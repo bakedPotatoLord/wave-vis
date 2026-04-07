@@ -8,9 +8,25 @@ import { onMounted, ref } from 'vue';
 // Math.sin(  (i+1000) / sr * 2 * Math.PI * 120) *
 // Math.sin( (i+2000) / sr * 2 * Math.PI * (i/2) )`
 
+
+// square(  i * 120) *
+// sin(i* 4) 
+
 const input = ref(`
+(
+r(i)>0.5?
+
 square(  i * 120) *
-sin(i* 4)
+sin(i* 4) 
+
+
+:
+
+sawtooth(  i * 240) *
+sawtooth(i* 24) 
+
+)*
+square(i*32)
 `);
 
 const loop = ref(false);
@@ -19,9 +35,11 @@ const visc = ref<HTMLCanvasElement>();
 
 let defs = new Map<string, number|((a:any)=>number)>([
   //convert sin and cos to revolutions/ Hz
+  ["r",(i)=>i/sampleRate.value],
   ["sin", (i)=>Math.sin(i*Math.PI*2 /sampleRate.value)],
   ["cos", (i)=>Math.cos(i*Math.PI*2 /sampleRate.value)],
   ["square", (i)=>(i/sampleRate.value)%2 < 1 ? -1 : 1],
+  ["sawtooth", (i)=>((i/sampleRate.value)%1 *2 -1) ],
   ["PI", Math.PI],
   ["pi", Math.PI],
   ["TAU", Math.PI*2],
@@ -61,6 +79,7 @@ function play() {
   for(let c = 0; c < buffer.numberOfChannels; c++) {
     let channel = buffer.getChannelData(c);
     for(let i = 0; i < buffer.length; i++) {
+      // console.log(i/sampleRate.value)
       channel[i] = f(i,sampleRate.value,...Array.from(defs.values()));
     }
   }
